@@ -1,0 +1,82 @@
+@model IEnumerable<TodoApp.Models.TodoItem>
+@{
+    Layout = "_Layout";
+}
+
+<div class="container">
+    <h2>Todo</h2>
+
+    <form id="todoForm">
+        <input id="todoInput" name="title" placeholder="Add todo..." autocomplete="off" />
+        <button type="submit">Add</button>
+    </form>
+
+    <ul id="todoList">
+        @foreach (var item in Model)
+        {
+            @Html.Partial("_TodoItemPartial", item)
+        }
+    </ul>
+</div>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('todoForm');
+    const input = document.getElementById('todoInput');
+    const list = document.getElementById('todoList');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = input.value.trim();
+        if (!title) return;
+        const fd = new FormData();
+        fd.append('title', title);
+        const res = await fetch('/Todo/Create', { method: 'POST', body: fd });
+        if (res.ok) {
+            const html = await res.text();
+            const temp = document.createElement('div');
+            temp.innerHTML = html;
+            list.prepend(temp.firstElementChild);
+            input.value = '';
+            input.focus();
+        } else {
+            console.error('Failed to add');
+        }
+    });
+
+    list.addEventListener('click', async (e) => {
+        const toggleBtn = e.target.closest('.toggle-btn');
+        const deleteBtn = e.target.closest('.delete-btn');
+
+        if (toggleBtn) {
+            const id = toggleBtn.dataset.id;
+            const res = await fetch(`/Todo/Toggle/${id}`, { method: 'POST' });
+            if (res.ok) {
+                const data = await res.json();
+                const li = document.getElementById('todo-' + id);
+                if (li) {
+                    li.classList.toggle('done', data.isDone);
+                }
+            }
+        }
+
+        if (deleteBtn) {
+            const id = deleteBtn.dataset.id;
+            const res = await fetch(`/Todo/Delete/${id}`, { method: 'POST' });
+            if (res.ok) {
+                const li = document.getElementById('todo-' + id);
+                if (li) li.remove();
+            }
+        }
+    });
+});
+</script>
+
+<style>
+#todoList { list-style: none; padding: 0; }
+#todoList li { padding: 8px; border-bottom: 1px solid #eee; display:flex; align-items:center; justify-content:space-between; }
+#todoList li.done .title { text-decoration: line-through; color: #888; }
+.toggle-btn, .delete-btn { margin-left: 8px; cursor: pointer; }
+</style>
+}

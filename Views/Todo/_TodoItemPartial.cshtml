@@ -1,0 +1,8 @@
+@model TodoApp.Models.TodoItem
+<li id="todo-@Model.Id" class="@(Model.IsDone ? "done" : "")">
+    <span class="title">@Model.Title</span>
+    <span>
+        <button class="toggle-btn" data-id="@Model.Id">@(Model.IsDone ? "Undo" : "Done")</button>
+        <button class="delete-btn" data-id="@Model.Id">Delete</button>
+    </span>
+</li>

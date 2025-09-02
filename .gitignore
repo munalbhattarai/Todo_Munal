@@ -1,0 +1,14 @@
+# Build artifacts
+bin/
+obj/
+
+# Local database 
+todos.db
+
+# User-specific / IDE files
+.vs/
+*.user
+*.suo
+
+
+appsettings.json
